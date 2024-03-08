@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Messaging App</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .message-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    .message {
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .message-form {
+        display: flex;
+        margin-top: 20px;
+    }
+    .message-input {
+        flex: 1;
+        padding: 5px;
+        font-size: 16px;
+    }
+    .message-submit {
+        padding: 5px 10px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Simple Messaging App</h1>
+    <ul class="message-list" id="message-list"></ul>
+    <form id="message-form" class="message-form">
+        <input type="text" id="message-input" class="message-input" placeholder="Type a message...">
+        <button type="submit" class="message-submit">Send</button>
+    </form>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    const messageList = document.getElementById('message-list');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+
+    // Handle receiving messages
+    socket.on('message', (message) => {
+        addMessage(message);
+    });
+
+    // Handle receiving existing messages
+    socket.on('messages', (messages) => {
+        messages.forEach(addMessage);
+    });
+
+    // Add message to the list
+    function addMessage(message) {
+        const messageItem = document.createElement('li');
+        messageItem.className = 'message';
+        messageItem.textContent = message;
+        messageList.appendChild(messageItem);
+    }
+
+    // Send message to the server
+    messageForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const messageText = messageInput.value.trim();
+        if (messageText !== '') {
+            socket.emit('message', messageText);
+            messageInput.value = '';
+        }
+    });
+</script>
+</body>
+</html>
